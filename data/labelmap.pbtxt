@@ -1,0 +1,16 @@
+item {
+    id: 1
+    name: 'fried_chicken'
+}
+item {
+    id: 2
+    name: 'fried_egg'
+}
+item {
+    id: 3
+    name: 'rice'
+}
+item {
+    id: 4
+    name: 'mixed_vegetables'
+}
