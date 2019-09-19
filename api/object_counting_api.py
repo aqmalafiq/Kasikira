@@ -497,7 +497,12 @@ def single_image_object_counting(input_video, detection_graph, category_index, i
                 detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
                 detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
                 num_detections = detection_graph.get_tensor_by_name('num_detections:0')            
-                input_frame = cv2.imread(input_video)
+                if "http" in input_video :
+                    img = cv2.VideoCapture(input_video)
+                    if(img.isOpened()) :
+                        ret,input_frame = img.read()
+                else :
+                    input_frame = cv2.imread(input_video)
 
                 # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
                 image_np_expanded = np.expand_dims(input_frame, axis=0)
