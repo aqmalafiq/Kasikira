@@ -34,14 +34,21 @@ def upload_file():
             return redirect(url_for('uploaded_file',
                                     filename=filename))
     return render_template("index.html")
-    #return single_image_object_counting.recognizeImage()
+    
 
 from flask import send_from_directory
 
-@app.route('/uploads/<filename>')
+@app.route('/show/<filename>', methods=['GET','POST'])
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename)
+    if request.method == 'POST':
+        if 'run' in request.form:
+            filename = request.form['run']
+            return single_image_object_counting.recognizeImage(str(filename))
+    return render_template('upload.html', filename=filename)
+
+@app.route('/uploads/<filename>')
+def send_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
 
 from werkzeug import SharedDataMiddleware
 app.add_url_rule('/uploads/<filename>', 'uploaded_file',

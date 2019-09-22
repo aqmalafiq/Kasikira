@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Index</title>
+</head>
+<body>
+    <h1>Run Mamak Recognition</h1>
+    <h3>On uploaded picture</h3>
+    {% set imgUrl = url_for('send_file', filename=filename) %}
+    <img src="{{imgUrl}}" alt="User Image" width="200" height="200">
+    <form method=post enctype=multipart/form-data>
+        <input type="submit" value="{{imgUrl}}" name="run"/>
+    </form>
+</body>
+</html>

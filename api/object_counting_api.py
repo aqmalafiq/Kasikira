@@ -503,7 +503,8 @@ def single_image_object_counting(input_video, detection_graph, category_index, i
                         ret,input_frame = img.read()
                 else :
                     input_frame = cv2.imread(input_video)
-
+                print("CHRCKRKHRNCJCDZ")
+                print(input_video)
                 # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
                 image_np_expanded = np.expand_dims(input_frame, axis=0)
 
@@ -530,7 +531,9 @@ def single_image_object_counting(input_video, detection_graph, category_index, i
                 else:
                     cv2.putText(input_frame, counting_mode, (10, 35), font, 0.8, (0,255,255),2,cv2.FONT_HERSHEY_SIMPLEX)
                 
-                cv2.imshow('tensorflow_object counting_api',input_frame)        
-                cv2.waitKey(0)
-
+                #cv2.imshow('tensorflow_object counting_api',input_frame) 
+                #cv2.waitKey(0) 
+                status = cv2.imwrite(str(input_video),input_frame)
+                while status == False :
+                    cv2.waitKey(100)
         return counting_mode
