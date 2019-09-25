@@ -10,6 +10,7 @@ AllOWED_EXTENSIONS = {'jpeg','jpg'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -42,9 +43,11 @@ from flask import send_from_directory
 def uploaded_file(filename):
     if request.method == 'POST':
         if 'run' in request.form:
-            filename = request.form['run']
-            return single_image_object_counting.recognizeImage(str(filename))
-    return render_template('upload.html', filename=filename)
+            imgUrl = request.form['run']
+            foodDetected = single_image_object_counting.recognizeImage(str(imgUrl))
+            imgUrl = url_for('send_file', filename=filename)
+            return render_template('detection.html', imgUrl=imgUrl, foodDetected=foodDetected)
+    return render_template('upload.html', filename=filename)    
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
@@ -56,9 +59,4 @@ app.add_url_rule('/uploads/<filename>', 'uploaded_file',
 app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
     '/upload':  app.config['UPLOAD_FOLDER']
 })
-
-# @app.route('/uploads/<path:filename>', methods=["POST"])
-# def download_file(filename):
-#     return send_from_directory(app.config['UPLOAD_FOLDER'],
-#                                filename, as_attachment=True)
 

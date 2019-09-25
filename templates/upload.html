@@ -9,7 +9,8 @@
     {% set imgUrl = url_for('send_file', filename=filename) %}
     <img src="{{imgUrl}}" alt="User Image" width="200" height="200">
     <form method=post enctype=multipart/form-data>
-        <input type="submit" value="{{imgUrl}}" name="run"/>
+        <input type="hidden" value="{{imgUrl}}" name="run"/>
+        <input type="submit" value="Run" name="action"/>
     </form>
 </body>
 </html>
