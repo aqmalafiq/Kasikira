@@ -1,14 +1,15 @@
 import os
-import single_image_object_counting
+import single_image_object_counting,calculate_item
 from flask import Flask, render_template, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
-
+#from flask_bootstrap import Bootstrap
 
 
 UPLOAD_FOLDER = './uploads'
 AllOWED_EXTENSIONS = {'jpeg','jpg'}
 
 app = Flask(__name__)
+#Bootstrap(app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
@@ -45,8 +46,11 @@ def uploaded_file(filename):
         if 'run' in request.form:
             imgUrl = request.form['run']
             foodDetected = single_image_object_counting.recognizeImage(str(imgUrl))
+            print("CHECKTYPE")
+            print(type(foodDetected))
+            totalPrice = calculate_item.calculatePrice(foodDetected)
             imgUrl = url_for('send_file', filename=filename)
-            return render_template('detection.html', imgUrl=imgUrl, foodDetected=foodDetected)
+            return render_template('detection.html', imgUrl=imgUrl, foodDetected=foodDetected, totalPrice=totalPrice)
     return render_template('upload.html', filename=filename)    
 
 @app.route('/uploads/<filename>')

@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Index</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
     <h1>Run Mamak Recognition</h1>
@@ -10,7 +11,7 @@
     <img src="{{imgUrl}}" alt="User Image" width="200" height="200">
     <form method=post enctype=multipart/form-data>
         <input type="hidden" value="{{imgUrl}}" name="run"/>
-        <input type="submit" value="Run" name="action"/>
+        <input class="btn btn-primary btn-lg" type="submit"  value="Run" name="action"/>
     </form>
 </body>
 </html>
