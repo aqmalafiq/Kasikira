@@ -1,15 +1,32 @@
 import os
+import eventlet
 import single_image_object_counting,calculate_item
+from PIL import Image
+from base64 import b64decode, b64encode
+from io import BytesIO
 from flask import Flask, render_template, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
-#from flask_bootstrap import Bootstrap
+from flask_socketio import SocketIO
 
 
 UPLOAD_FOLDER = './uploads'
 AllOWED_EXTENSIONS = {'jpeg','jpg'}
 
 app = Flask(__name__)
-#Bootstrap(app)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
+
+@socketio.on('process-image')
+def process_image(sid,b64_image):
+    raw_image = BytesIO()
+    image_data = BytesIO(b64decode(b64_image[22:]))
+    Image.open(image_data).convert('LA').save(raw_image, format='PNG')
+    socketio.emit("processed-image", b64encode(raw_image.getvalue()).decode())
+
+@socketio.on('disconnect', namespace='/test')
+def test_disconnect():
+    print('Client disconnected')
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
@@ -64,3 +81,5 @@ app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
     '/upload':  app.config['UPLOAD_FOLDER']
 })
 
+if __name__ == '__main__':
+    socketio.run(app)

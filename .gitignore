@@ -1,3 +1,6 @@
 input_images_and_videos/
 upload/
 uploads/
+__pycache__/
+opencv/.editorconfig
+opencv/

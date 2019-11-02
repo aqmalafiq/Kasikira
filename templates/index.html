@@ -3,6 +3,8 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
     <h1>Livestream Model</h1>
+    <video id="cameraView" class="img-fluid"></video>
+    <image id="serverProcessing" />
     
     <title>Upload A Picture</title>
     <h1>Upload new File</h1>
@@ -19,4 +21,39 @@
           </div>
       </div>  
     </form>
-    
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" 
+            integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" 
+            crossorigin="anonymous">
+    </script>
+    <script>
+      const videoCanvas = document.createElement("canvas");
+      const videoContext = videoCanvas.getContext("2d");
+      const cameraView = document.getElementById("cameraView");
+      const serverProcessing = document.getElementById("serverProcessing");
+
+      let imageServer = io();
+      imageServer.on('processed-image', (imageData) => {
+        serverProcessing.src = `data:image/png;base64,${imageData}`
+      });
+
+      cameraView.addEventListener("canplay", () => {
+        console.log(cameraView.videoWidth, cameraView.videoHeight);
+        serverProcessing.width = cameraView.videoWidth;
+        serverProcessing.height = cameraView.videoHeight;
+
+        videoCanvas.width = cameraView.videoWidth;
+        videoCanvas.height = cameraView.videoHeight;
+      });
+
+      navigator.mediaDevices.getUserMedia({ video: true }).then(videoStream => {
+          cameraView.srcObject = videoStream;
+          cameraView.play();
+        }
+      ).catch(() => alert("Camera Access Denied"));
+
+      setInterval(() => {
+        videoContext.drawImage(cameraView, 0, 0);
+        imageServer.emit("process-image", videoCanvas.toDataURL("image/png"));
+      }, 1000 / 10);
+    </script>
