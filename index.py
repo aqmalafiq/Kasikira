@@ -7,7 +7,10 @@ from io import BytesIO
 from flask import Flask, render_template, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from flask_socketio import SocketIO
+from api.object_counting_api import single_image_object_counting as sioc
 
+from utils import backbone
+import numpy as np
 
 UPLOAD_FOLDER = './uploads'
 AllOWED_EXTENSIONS = {'jpeg','jpg'}
@@ -17,15 +20,17 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
 @socketio.on('process-image')
-def process_image(sid,b64_image):
+def process_image(b64_image):
     raw_image = BytesIO()
     image_data = BytesIO(b64decode(b64_image[22:]))
-    Image.open(image_data).convert('LA').save(raw_image, format='PNG')
-    socketio.emit("processed-image", b64encode(raw_image.getvalue()).decode())
+    detection_graph, category_index = backbone.set_model('inference_graphGPU3', 'labelmap.pbtxt')
+    json,img = sioc(np.frombuffer(image_data.getvalue(), np.uint8), detection_graph, category_index, 0)
+    # Image.open(image_data).convert('LA').save(raw_image, format='PNG')
+    socketio.emit("processed-image", b64encode(img).decode())
 
-@socketio.on('disconnect', namespace='/test')
-def test_disconnect():
-    print('Client disconnected')
+@socketio.on('connect')
+def test_connect():
+    print('Client connected')
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0

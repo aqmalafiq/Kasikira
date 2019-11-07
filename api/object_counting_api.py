@@ -9,6 +9,8 @@ import csv
 import cv2
 import numpy as np
 from utils import visualization_utils as vis_util
+from io import BytesIO
+import numpy
 
 # Variables
 total_passed_vehicle = 0  # using it to count vehicles
@@ -501,6 +503,8 @@ def single_image_object_counting(input_video, detection_graph, category_index, i
                     img = cv2.VideoCapture(input_video)
                     if(img.isOpened()) :
                         ret,input_frame = img.read()
+                elif type(input_video) == numpy.ndarray:
+                    input_frame = cv2.imdecode(input_video, cv2.IMREAD_COLOR)
                 else :
                     input_frame = cv2.imread(input_video)
                 print("CHRCKRKHRNCJCDZ")
@@ -533,7 +537,8 @@ def single_image_object_counting(input_video, detection_graph, category_index, i
                 
                 #cv2.imshow('tensorflow_object counting_api',input_frame) 
                 #cv2.waitKey(0) 
-                status = cv2.imwrite(str(input_video),input_frame)
-                while status == False :
-                    cv2.waitKey(100)
-        return counting_mode
+                # status = cv2.imwrite(str(input_video),input_frame)
+                _,final_img = cv2.imencode(".jpeg", input_frame)
+                # while status == False :
+                #     cv2.waitKey(100)
+        return counting_mode,final_img

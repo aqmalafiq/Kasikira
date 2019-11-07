@@ -1,11 +1,13 @@
 <!doctype html>
 <head>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" 
+        crossorigin="anonymous">
 </head>
     <h1>Livestream Model</h1>
     <video id="cameraView" class="img-fluid"></video>
-    <image id="serverProcessing" />
-    
+    <canvas id="serverProcessing"></canvas>
+
     <title>Upload A Picture</title>
     <h1>Upload new File</h1>
     <form method=post enctype=multipart/form-data>
@@ -22,19 +24,24 @@
       </div>  
     </form>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" 
             integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" 
             crossorigin="anonymous">
     </script>
     <script>
+      const imageElm = document.createElement("img");
       const videoCanvas = document.createElement("canvas");
       const videoContext = videoCanvas.getContext("2d");
       const cameraView = document.getElementById("cameraView");
       const serverProcessing = document.getElementById("serverProcessing");
 
-      let imageServer = io();
+      imageElm.addEventListener("load", () => {
+        serverProcessing.getContext("2d").drawImage(imageElm, 0, 0);
+      })
+
+      var imageServer = io();
       imageServer.on('processed-image', (imageData) => {
-        serverProcessing.src = `data:image/png;base64,${imageData}`
+        imageElm.src = `data:image/png;base64,${imageData}`
       });
 
       cameraView.addEventListener("canplay", () => {
@@ -54,6 +61,6 @@
 
       setInterval(() => {
         videoContext.drawImage(cameraView, 0, 0);
-        imageServer.emit("process-image", videoCanvas.toDataURL("image/png"));
-      }, 1000 / 10);
+        imageServer.emit("process-image", videoCanvas.toDataURL("image/jpeg"));
+      }, 1000 / 5);
     </script>
