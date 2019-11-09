@@ -34,6 +34,7 @@
       const videoContext = videoCanvas.getContext("2d");
       const cameraView = document.getElementById("cameraView");
       const serverProcessing = document.getElementById("serverProcessing");
+      var counter = 1;
 
       imageElm.addEventListener("load", () => {
         serverProcessing.getContext("2d").drawImage(imageElm, 0, 0);
@@ -61,6 +62,6 @@
 
       setInterval(() => {
         videoContext.drawImage(cameraView, 0, 0);
-        imageServer.emit("process-image", videoCanvas.toDataURL("image/jpeg"));
-      }, 1000 / 5);
+        imageServer.emit("process-image", videoCanvas.toDataURL("image/jpeg"),counter = counter + 1);
+      }, 1000 / 30);
     </script>
