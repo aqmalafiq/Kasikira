@@ -18,14 +18,14 @@ AllOWED_EXTENSIONS = {'jpeg','jpg'}
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
+detection_graph, category_index = backbone.set_model('inference_graphGPU3', 'labelmap.pbtxt')
+modal = mamakDetector(detection_graph) 
 
 @socketio.on('process-image')
 def process_image(b64_image,counter):
-    raw_image = BytesIO()
+    #raw_image = BytesIO()
     image_data = BytesIO(b64decode(b64_image[22:]))
-    detection_graph, category_index = backbone.set_model('inference_graphGPU3', 'labelmap.pbtxt')
-    env = mamakDetector(detection_graph)
-    json,img = env.detectStream(np.frombuffer(image_data.getvalue(), np.uint8),counter,category_index,0)
+    json,img = modal.detectStream(np.frombuffer(image_data.getvalue(), np.uint8),counter,category_index,0)
     #json,img = sioc(np.frombuffer(image_data.getvalue(), np.uint8), detection_graph, category_index, 0)
     # Image.open(image_data).convert('LA').save(raw_image, format='PNG')
     socketio.emit("processed-image", b64encode(img).decode())

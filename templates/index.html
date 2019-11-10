@@ -63,5 +63,5 @@
       setInterval(() => {
         videoContext.drawImage(cameraView, 0, 0);
         imageServer.emit("process-image", videoCanvas.toDataURL("image/jpeg"),counter = counter + 1);
-      }, 1000 / 30);
+      }, 1000 / 5);
     </script>

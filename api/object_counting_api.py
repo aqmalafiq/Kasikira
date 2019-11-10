@@ -10,8 +10,13 @@ import numpy
 total_passed_vehicle = 0  # using it to count vehicles
 class mamakDetector:
     def __init__(self, detection_graph):
+        config = tf.ConfigProto(intra_op_parallelism_threads=8, 
+                                inter_op_parallelism_threads=2, 
+                                allow_soft_placement=True, 
+                                device_count = {'CPU': 8})
         detection_graph.as_default()
-        self.sess = tf.Session(graph=detection_graph)
+        self.sess = tf.Session(graph=detection_graph,config=config)
+        tf.device('/device:GPU:0')
         self.image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
         self.detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
         self.detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
