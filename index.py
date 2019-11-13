@@ -1,5 +1,6 @@
 import os
 import eventlet
+eventlet.monkey_patch()
 import single_image_object_counting,calculate_item
 from PIL import Image
 from base64 import b64decode, b64encode
@@ -25,10 +26,11 @@ modal = mamakDetector(detection_graph)
 def process_image(b64_image,counter):
     #raw_image = BytesIO()
     image_data = BytesIO(b64decode(b64_image[22:]))
+    modal.startSession(detection_graph)
     json,img = modal.detectStream(np.frombuffer(image_data.getvalue(), np.uint8),counter,category_index,0)
     #json,img = sioc(np.frombuffer(image_data.getvalue(), np.uint8), detection_graph, category_index, 0)
     # Image.open(image_data).convert('LA').save(raw_image, format='PNG')
-    socketio.emit("processed-image", b64encode(img).decode())
+    socketio.emit("processed-image", {'image': b64encode(img).decode(),'item': json})
 
 @socketio.on('connect')
 def test_connect():
@@ -69,12 +71,20 @@ def uploaded_file(filename):
     if request.method == 'POST':
         if 'run' in request.form:
             imgUrl = request.form['run']
-            foodDetected = single_image_object_counting.recognizeImage(str(imgUrl))
-            print("CHECKTYPE")
-            print(type(foodDetected))
-            totalPrice = calculate_item.calculatePrice(foodDetected)
+            modal.startSession(detection_graph)
+            foodDetected = modal.detectSingleImage("."+str(imgUrl),detection_graph,category_index,0)
+            modal.endSession()
+            mydict = {}
+            foodDetected = foodDetected.replace("'","")
+            foodDetected = foodDetected.replace(" ","")
+            splitted = foodDetected.split(",")
+
+            for v in splitted:
+                aux = v.split(":")
+                mydict[aux[0]] = aux[2]
+            
             imgUrl = url_for('send_file', filename=filename)
-            return render_template('detection.html', imgUrl=imgUrl, foodDetected=foodDetected, totalPrice=totalPrice)
+            return render_template('detection.html', imgUrl=imgUrl, foodDetected=mydict, totalPrice=calculate_item.calculatePrice(mydict))
     return render_template('upload.html', filename=filename)    
 
 @app.route('/uploads/<filename>')
