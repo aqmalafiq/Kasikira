@@ -1,14 +1,13 @@
 import os
 import eventlet
 eventlet.monkey_patch()
-import single_image_object_counting,calculate_item
+import calculate_item
 from PIL import Image
 from base64 import b64decode, b64encode
 from io import BytesIO
 from flask import Flask, render_template, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from flask_socketio import SocketIO
-from api.object_counting_api import single_image_object_counting as sioc
 from api.object_counting_api import mamakDetector
 from utils import backbone
 import numpy as np
@@ -18,19 +17,16 @@ AllOWED_EXTENSIONS = {'jpeg','jpg'}
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='eventlet')
 detection_graph, category_index = backbone.set_model('inference_graphGPU3', 'labelmap.pbtxt')
 modal = mamakDetector(detection_graph) 
 
 @socketio.on('process-image')
 def process_image(b64_image,counter):
-    #raw_image = BytesIO()
     image_data = BytesIO(b64decode(b64_image[22:]))
     modal.startSession(detection_graph)
     json,img = modal.detectStream(np.frombuffer(image_data.getvalue(), np.uint8),counter,category_index,0)
-    #json,img = sioc(np.frombuffer(image_data.getvalue(), np.uint8), detection_graph, category_index, 0)
-    # Image.open(image_data).convert('LA').save(raw_image, format='PNG')
-    socketio.emit("processed-image", {'image': b64encode(img).decode(),'item': json})
+    socketio.emit("processed-image", {'image': 'b64encode(img).decode()','item': json})
 
 @socketio.on('connect')
 def test_connect():

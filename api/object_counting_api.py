@@ -12,7 +12,6 @@ from datetime import datetime
 total_passed_vehicle = 0  # using it to count vehicles
 class mamakDetector:
     def __init__(self, detection_graph):
-        detection_graph.as_default()
         # tf.device('/device:GPU:0')
         self.image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
         self.detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
@@ -25,12 +24,14 @@ class mamakDetector:
                                 inter_op_parallelism_threads=2, 
                                 allow_soft_placement=True, 
                                 device_count = {'CPU': 8})
+        detection_graph.as_default()
         self.sess = tf.Session(graph=detection_graph,config=config)
 
     def endSession(self):
         self.sess.close()
 
     def detectStream(self,input_video,frameNumber,category_index,is_color_recognition_enabled):
+        counting_mode = "..."
         if type(input_video) == numpy.ndarray:
             input_frame = cv2.imdecode(input_video, cv2.IMREAD_COLOR)
             # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
