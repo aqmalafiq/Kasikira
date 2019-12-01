@@ -30,7 +30,8 @@ def process_image(b64_image):
 
     for v in splitted:
         aux = v.split(":")
-        mydict[aux[0]] = aux[2] 
+        if len(aux) > 1:
+            mydict[aux[0]] = aux[2] 
     print(mydict)
     socketio.emit("processed-text",mydict)
 

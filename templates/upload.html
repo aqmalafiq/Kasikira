@@ -25,51 +25,53 @@
     </div>
   </nav>
   <div class="container mt-5">
-      <div class="row">
-        <div class="col-xs-12 col-md-6">
-          <div class="card">
-            <div class="card-header">
-              Scan 'Lauk'
-            </div>
-            <div class="card-body">
-              <div class="row">
-                <div id="canvasParent" class="col d-flex justify-content-center">
-                  <canvas id="imageCanvas"></canvas>
-                </div>
+    <div class="row">
+      <div class="col-xs-12 col-md-6">
+        <div class="card">
+          <div class="card-header">
+            Scan 'Lauk'
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div id="canvasParent" class="col d-flex justify-content-center">
+                <canvas id="imageCanvas"></canvas>
+                <img id="processedImage" class="rounded img-fluid" hidden>
               </div>
-              <hr>
-              <div class="row">
-                <div class="col">
-                  <div class="input-group">
-                      <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="inputFile" aria-describedby="inputGroupFileAddon04">
-                        <label class="custom-file-label" for="inputFile" id="inputLabel">Choose file</label>
-                      </div>
-                      <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="uploadButton" disabled>Upload</button>
-                      </div>
+            </div>
+            <hr>
+            <div class="row">
+              <div class="col">
+                <div class="input-group" id="buttonGroup">
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="inputFile"
+                      aria-describedby="inputGroupFileAddon04">
+                    <label class="custom-file-label" for="inputFile" id="inputLabel">Choose file</label>
+                  </div>
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="uploadButton" disabled>Upload</button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-sm-12 col-md-6">
-          <div class="card" style="height: 100%">
-            <div class="card-header">Receipts</div>
-            <div class="card-body">
-              <table id="tableBody" class="table table-striped table-responsive">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Lauk</th>
-                    <th>Quantity</th>
-                    <th>RM/pcs</th>
-                    <th>Total (RM)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- <tr>
+      </div>
+      <div class="col-sm-12 col-md-6">
+        <div class="card" style="height: 100%">
+          <div class="card-header">Receipts</div>
+          <div class="card-body">
+            <table id="tableBody" class="table table-striped table-responsive">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Lauk</th>
+                  <th>Quantity</th>
+                  <th>RM/pcs</th>
+                  <th>Total (RM)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- <tr>
                     <th>1</th>
                     <th>Ayam Goreng</th>
                     <th>2</th>
@@ -80,13 +82,13 @@
                     <th colspan="4">TOTAL</th>
                     <th>RM 6.00</th>
                   </tr> -->
-                </tbody>
-              </table>
-            </div>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
@@ -102,28 +104,48 @@
   <script>
     const inputFile = document.getElementById('inputFile');
     const uploadButton = document.getElementById('uploadButton');
-    const canvasParent = document.getElementById('canvasParent')
+    const buttonGroup = document.getElementById('buttonGroup');
+    const canvasParent = document.getElementById('canvasParent');
+    const processedImage = document.getElementById('processedImage')
     var canvasImage = document.getElementById('imageCanvas');
+    var imageServer = io();
 
-    inputFile.addEventListener("change",() => {
+    inputFile.addEventListener("change", () => {
       uploadButton.disabled = false;
       const label = document.getElementById('inputLabel');
       label.textContent = inputFile.value;
-      
+
     });
 
-    uploadButton.addEventListener("click", () =>{
+    uploadButton.addEventListener("click", () => {
       console.log("clicked");
       var ctx = canvasImage.getContext('2d');
       var img = new Image();
-      img.onload = function() {
+      img.onload = function () {
         canvasImage.height = img.height;
         canvasImage.width = img.width;
-        ctx.drawImage(img,0,0, img.width, img.height);
-        // URL.revokeObjectURL(img.src);
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+        URL.revokeObjectURL(img.src);
       }
       img.src = URL.createObjectURL(inputFile.files[0]);
+      buttonGroup.innerHTML = "";
+      buttonGroup.innerHTML = '<button id="scanButton" type="button" class="btn btn-outline-success">Scan for food</button><button id="reuploadButton" type="button" class="btn btn-outline-info">Reupload</button>';
+      const scanButton = document.getElementById('scanButton');
+      const reuploadButton = document.getElementById('reuploadButton');
+      
+      scanButton.addEventListener("click",() => {
+        console.log("clicked process image")
+        imageServer.emit("process-image", canvasImage.toDataURL("image/jpeg"));
+      });
     });
+
+    imageServer.on("processed-image", (image) => {
+      console.log("CLIENT RECEIVED IMAGE");
+      canvasImage.hidden = true;
+      processedImage.src = `data:image/png;base64,${image}`;
+      processedImage.hidden = false;
+    });
+    
 
   </script>
 </body>
