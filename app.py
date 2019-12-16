@@ -5,6 +5,7 @@ from api.object_counting_api import mamakDetector
 from base64 import b64decode,b64encode
 from utils import backbone
 import numpy as np
+import calculator
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -32,7 +33,9 @@ def process_image(b64_image):
         aux = v.split(":")
         if len(aux) > 1:
             mydict[aux[0]] = aux[2] 
+    mydict = calculator.calculatePrice(mydict)
     print(mydict)
+    #{'fried_egg': '1', 'mixed_vegetables': '1', 'rice': '2', 'fried_chicken': '1', 'total_price' : xx.xx}
     socketio.emit("processed-text",mydict)
 
 @app.route('/')

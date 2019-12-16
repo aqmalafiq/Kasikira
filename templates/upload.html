@@ -60,7 +60,7 @@
         <div class="card" style="height: 100%">
           <div class="card-header">Receipts</div>
           <div class="card-body">
-            <table id="tableBody" class="table table-striped table-responsive">
+            <table id="receiptTable" class="table table-striped table-responsive">
               <thead>
                 <tr>
                   <th>#</th>
@@ -108,6 +108,7 @@
     const canvasParent = document.getElementById('canvasParent');
     const processedImage = document.getElementById('processedImage')
     var canvasImage = document.getElementById('imageCanvas');
+    var table = document.getElementById("receiptTable");
     var imageServer = io();
 
     inputFile.addEventListener("change", () => {
@@ -145,7 +146,48 @@
       processedImage.src = `data:image/png;base64,${image}`;
       processedImage.hidden = false;
     });
-    
+    imageServer.on("processed-text", (jsonData) => {
+      console.log("CLIENT RECEIVED JSON DATA");
+      'use strict';
+      index = 0;
+      for(const [key,value] of Object.entries(jsonData)) {
+        console.log(key,value)
+        if(key == "grand_total"){
+          grandTotalRow = table.insertRow();
+          grandTotalRow.insertCell();
+          grandTotalRow.insertCell();
+          grandTotalRow.insertCell();
+          nameCell = grandTotalRow.insertCell();
+          nameText = document.createTextNode(key);
+          grandTotalCell = grandTotalRow.insertCell();
+          grandTotalText = document.createTextNode(value);
+          nameCell.appendChild(nameText);
+          grandTotalCell.appendChild(grandTotalText);
+        }
+        else{
+          index += 1;
+          var newRow = table.insertRow();
+
+          var indexCell = newRow.insertCell();
+          var laukCell = newRow.insertCell();
+          var qtyCell = newRow.insertCell();
+          var priceCell = newRow.insertCell();
+          var totalCell = newRow.insertCell();
+
+          var idxText = document.createTextNode(index);
+          var laukText = document.createTextNode(key);
+          var qtyText = document.createTextNode(value.qty);
+          var priceText = document.createTextNode(value.price);
+          var totalText = document.createTextNode((parseFloat(value.price) * parseFloat(value.qty)).toFixed(2));
+
+          indexCell.appendChild(idxText);
+          laukCell.appendChild(laukText);
+          qtyCell.appendChild(qtyText);
+          priceCell.appendChild(priceText);
+          totalCell.appendChild(totalText);
+        }
+      }
+    }) 
 
   </script>
 </body>
