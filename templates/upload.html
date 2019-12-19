@@ -106,11 +106,15 @@
     const uploadButton = document.getElementById('uploadButton');
     const buttonGroup = document.getElementById('buttonGroup');
     const canvasParent = document.getElementById('canvasParent');
-    const processedImage = document.getElementById('processedImage')
+    const processedImage = document.getElementById('processedImage');
+    const resetButton = document.getElementById("resetButton");
     var canvasImage = document.getElementById('imageCanvas');
     var table = document.getElementById("receiptTable");
     var imageServer = io();
 
+    resetButton.addEventListener("click", () => {
+      location.reload();
+    });
     inputFile.addEventListener("change", () => {
       uploadButton.disabled = false;
       const label = document.getElementById('inputLabel');
