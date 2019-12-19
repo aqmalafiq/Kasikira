@@ -134,12 +134,17 @@
       }
       img.src = URL.createObjectURL(inputFile.files[0]);
       buttonGroup.innerHTML = "";
-      buttonGroup.innerHTML = '<button id="scanButton" type="button" class="btn btn-outline-success">Scan for food</button><button id="reuploadButton" type="button" class="btn btn-outline-info">Reupload</button>';
+      buttonGroup.innerHTML = '<button id="scanButton" type="button" class="btn btn-outline-success">Scan for food</button>';
       const scanButton = document.getElementById('scanButton');
       const reuploadButton = document.getElementById('reuploadButton');
       
       scanButton.addEventListener("click",() => {
-        console.log("clicked process image")
+        console.log("clicked process image");
+        scanButton.disabled = true;
+        scanButton.innerText = "";
+        var loading = document.createElement("SPAN");
+        loading.className = "spinner-border spinner-border-sm";
+        scanButton.appendChild(loading);
         imageServer.emit("process-image", canvasImage.toDataURL("image/jpeg"));
       });
     });
@@ -149,6 +154,7 @@
       canvasImage.hidden = true;
       processedImage.src = `data:image/png;base64,${image}`;
       processedImage.hidden = false;
+      scanButton.hidden = true;
     });
     imageServer.on("processed-text", (jsonData) => {
       console.log("CLIENT RECEIVED JSON DATA");
@@ -161,12 +167,12 @@
           grandTotalRow.insertCell();
           grandTotalRow.insertCell();
           grandTotalRow.insertCell();
-          nameCell = grandTotalRow.insertCell();
-          nameText = document.createTextNode(key);
-          grandTotalCell = grandTotalRow.insertCell();
-          grandTotalText = document.createTextNode(value);
-          nameCell.appendChild(nameText);
-          grandTotalCell.appendChild(grandTotalText);
+          grandTotalTextCell = document.createElement("TH");
+          grandTotalCell = document.createElement("TH");
+          grandTotalTextCell.appendChild(document.createTextNode("Grand Total"));
+          grandTotalCell.appendChild(document.createTextNode(value));
+          grandTotalRow.appendChild(grandTotalTextCell);
+          grandTotalRow.appendChild(grandTotalCell);
         }
         else{
           index += 1;
