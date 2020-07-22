@@ -1,5 +1,5 @@
-# webMamakRecog
-Implementation of mamakrecog with Django for web apps
+# KasiKira
+Implementation of KasiKira with flask web apps
 
 install Guide : 
 
